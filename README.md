@@ -63,7 +63,7 @@ it (or a local mirror):
 | Support | Community | Email | Priority |
 
 Pro ($29/mo) and Team ($99/mo) licenses, each with a 14-day free trial:
-**https://whop.com/nizar-tuanku/patchlight-cve-prioritizer**
+**https://whop.com/nizar-tuanku/patchlight-cve-prioritizer?utm_source=github**
 
 A license key activates instantly and validates **offline**. An expired key
 returns to free limits.
@@ -106,7 +106,7 @@ Available on every tier, free included.
 
 A practising network security engineer. Part of the Sentinel line of
 self-hosted security tools:
-[CertWatch](https://whop.com/nizar-tuanku/certwatch-tls-monitor) (certs),
-[Attack Surface Monitor](https://whop.com/nizar-tuanku/attack-surface-monitor) (exposure),
-[Decoy](https://whop.com/nizar-tuanku/decoy-canary-honeypots) (intrusion) — and
+[CertWatch](https://whop.com/nizar-tuanku/certwatch-tls-monitor?utm_source=github) (certs),
+[Attack Surface Monitor](https://whop.com/nizar-tuanku/attack-surface-monitor?utm_source=github) (exposure),
+[Decoy](https://whop.com/nizar-tuanku/decoy-canary-honeypots?utm_source=github) (intrusion) — and
 Patchlight tells you what to patch first.
