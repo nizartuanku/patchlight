@@ -26,8 +26,8 @@ type Provider struct {
 	TTL     time.Duration
 	Now     func() time.Time
 
-	mu     sync.Mutex
-	cache  map[string]entry
+	mu    sync.Mutex
+	cache map[string]entry
 }
 
 type entry struct {
@@ -72,25 +72,47 @@ func (p *Provider) Scores(ctx context.Context, cves []string) (map[string]float6
 	if base == "" {
 		base = DefaultAPIBase
 	}
-	u := base + "?cve=" + url.QueryEscape(strings.Join(missing, ","))
-	body, err := p.Fetch(ctx, u)
-	if err != nil {
-		return out, err
-	}
-	fetched, perr := parse(body)
-	if perr != nil {
-		return out, perr
-	}
 
-	p.mu.Lock()
-	for _, c := range missing {
-		score := fetched[c] // 0 if absent
-		p.cache[c] = entry{score: score, fetched: now()}
-		out[c] = score
+	// Request in pages. The API caps how many records it returns per call and
+	// simply returns fewer than asked rather than erroring, so one request
+	// carrying a whole inventory silently loses everything past the first page —
+	// and those CVEs would then be cached as 0.0 for the TTL, sinking genuinely
+	// exploited vulnerabilities to the bottom of an exploitation-first list.
+	// Paging also keeps the query string a sane length.
+	for start := 0; start < len(missing); start += pageSize {
+		end := start + pageSize
+		if end > len(missing) {
+			end = len(missing)
+		}
+		page := missing[start:end]
+
+		u := base + "?limit=" + strconv.Itoa(pageSize) +
+			"&cve=" + url.QueryEscape(strings.Join(page, ","))
+		body, err := p.Fetch(ctx, u)
+		if err != nil {
+			return out, err // partial results plus the error; the caller decides
+		}
+		fetched, perr := parse(body)
+		if perr != nil {
+			return out, perr
+		}
+
+		// Only cache the page we actually got an answer for. A CVE genuinely
+		// absent from the response has no published score, which is a real 0.
+		p.mu.Lock()
+		for _, c := range page {
+			score := fetched[c]
+			p.cache[c] = entry{score: score, fetched: now()}
+			out[c] = score
+		}
+		p.mu.Unlock()
 	}
-	p.mu.Unlock()
 	return out, nil
 }
+
+// pageSize is how many CVEs are requested per call: FIRST's API returns at most
+// its own page limit per request no matter how many ids are supplied.
+const pageSize = 100
 
 type apiResp struct {
 	Data []struct {
