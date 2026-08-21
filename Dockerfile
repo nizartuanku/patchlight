@@ -14,9 +14,14 @@ RUN CGO_ENABLED=1 go build -trimpath \
     -o /out/patchlight ./cmd/patchlight
 
 FROM debian:bookworm-slim
+# /data is created and chowned here so a named volume inherits the app user's
+# ownership. Without this the volume defaults to root:root and the unprivileged
+# process cannot create its database.
 RUN useradd -r -u 10001 patchlight \
  && apt-get update && apt-get install -y --no-install-recommends ca-certificates \
- && rm -rf /var/lib/apt/lists/*
+ && rm -rf /var/lib/apt/lists/* \
+ && mkdir -p /data \
+ && chown patchlight:patchlight /data
 COPY --from=build /out/patchlight /usr/local/bin/patchlight
 USER patchlight
 VOLUME /data
