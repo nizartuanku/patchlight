@@ -68,7 +68,7 @@ Pro ($29/mo) and Team ($99/mo) licenses, each with a 14-day free trial:
 A license key activates instantly and validates **offline**. An expired key
 returns to free limits.
 
-## Working with the other Sentinel tools
+## Working with the other Hexward tools
 
 Every tool in the line can emit its findings as syslog, which is how they feed
 each other:
@@ -86,7 +86,7 @@ Point it at [Loglight](https://github.com/nizartuanku/loglight) and its findings
 land next to Loglight's own detections: a Decoy trip from an address Loglight
 already saw port-scanning is raised as one critical incident with the timeline
 attached, rather than two alerts you have to join up yourself. Any other syslog
-collector works too — there is nothing Sentinel-specific about the format.
+collector works too — there is nothing Hexward-specific about the format.
 
 Available on every tier, free included.
 
@@ -104,9 +104,9 @@ Available on every tier, free included.
 
 ## Built by
 
-A practising network security engineer. Part of the Sentinel line of
+A practising network security engineer. Part of the Hexward line of
 self-hosted security tools:
-[CertWatch](https://whop.com/nizar-tuanku/certwatch-tls-monitor?utm_source=github) (certs),
+[CertLight](https://whop.com/nizar-tuanku/certlight-tls-monitor?utm_source=github) (certs),
 [Attack Surface Monitor](https://whop.com/nizar-tuanku/attack-surface-monitor?utm_source=github) (exposure),
 [Decoy](https://whop.com/nizar-tuanku/decoy-canary-honeypots?utm_source=github) (intrusion) — and
 Patchlight tells you what to patch first.
