@@ -25,17 +25,17 @@ const ModuleID = "patchlight"
 // prioritisation signals. The Intel implementation fills it; the Collector only
 // ranks and renders it.
 type Vuln struct {
-	ID           string  `json:"id"`            // CVE-2024-3094
-	Summary      string  `json:"summary"`       // one-line description
-	CVSS         float64 `json:"cvss"`          // base score 0..10 (0 = unknown)
-	CVSSVector   string  `json:"cvss_vector"`   //
-	EPSS         float64 `json:"epss"`          // exploit probability 0..1
-	KEV          bool    `json:"kev"`           // on CISA Known Exploited list
+	ID           string  `json:"id"`             // CVE-2024-3094
+	Summary      string  `json:"summary"`        // one-line description
+	CVSS         float64 `json:"cvss"`           // base score 0..10 (0 = unknown)
+	CVSSVector   string  `json:"cvss_vector"`    //
+	EPSS         float64 `json:"epss"`           // exploit probability 0..1
+	KEV          bool    `json:"kev"`            // on CISA Known Exploited list
 	KEVDateAdded string  `json:"kev_date_added"` //
-	FixedVersion string  `json:"fixed_version"` // if NVD/advisory gives one
-	MatchedCPE   string  `json:"matched_cpe"`   // the CPE NVD matched
-	VersionRange string  `json:"version_range"` // human hint, e.g. "< 1.24.1"
-	URL          string  `json:"url"`           // canonical CVE link
+	FixedVersion string  `json:"fixed_version"`  // if NVD/advisory gives one
+	MatchedCPE   string  `json:"matched_cpe"`    // the CPE NVD matched
+	VersionRange string  `json:"version_range"`  // human hint, e.g. "< 1.24.1"
+	URL          string  `json:"url"`            // canonical CVE link
 }
 
 // Priority buckets, most urgent first. They map to core severities but carry the

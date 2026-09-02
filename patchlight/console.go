@@ -71,11 +71,11 @@ func (c *Console) handleAdd(w http.ResponseWriter, r *http.Request) {
 }
 
 type sbomResult struct {
-	Added     int      `json:"added"`
-	Skipped   int      `json:"skipped"`
-	Limited   int      `json:"limited"`
-	Items     []string `json:"items"`
-	FirstError string  `json:"first_error,omitempty"`
+	Added      int      `json:"added"`
+	Skipped    int      `json:"skipped"`
+	Limited    int      `json:"limited"`
+	Items      []string `json:"items"`
+	FirstError string   `json:"first_error,omitempty"`
 }
 
 func (c *Console) handleSBOM(w http.ResponseWriter, r *http.Request) {
