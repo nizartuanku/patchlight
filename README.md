@@ -104,7 +104,7 @@ Available on every tier, free included.
 
 ## Built by
 
-A practising network security engineer. Part of the Hexward line of
+Nizar Tuanku — Cybersecurity. Part of the Hexward line of
 self-hosted security tools:
 [CertLight](https://whop.com/nizar-tuanku/certlight-tls-monitor?utm_source=github) (certs),
 [Attack Surface Monitor](https://whop.com/nizar-tuanku/attack-surface-monitor?utm_source=github) (exposure),
