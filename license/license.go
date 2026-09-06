@@ -50,25 +50,29 @@ type Limits struct {
 	ScanNow        bool // may trigger on-demand scans
 }
 
-// TierLimits is the single source of truth for what each tier buys.
-// CertWatch's product page must match this table — one place to change.
+// TierLimits is the fallback table, used when a caller does not install its
+// own. cmd/patchlight installs patchlightTierLimits, which this mirrors
+// exactly — the two used to disagree because these numbers were inherited
+// from CertWatch, and a fallback that quietly contradicts the product is
+// worse than no fallback at all. Change both together, and keep the README
+// edition table matching them.
 var TierLimits = map[Tier]Limits{
 	TierFree: {
-		MaxTargets:    10,
-		RetentionDays: 7,
-		Channels:      []string{"webhook"},
+		MaxTargets:    150,
+		RetentionDays: 30,
+		Channels:      []string{"webhook", "syslog"},
 	},
 	TierPro: {
-		MaxTargets:     100,
+		MaxTargets:     500,
 		RetentionDays:  365,
-		Channels:       []string{"webhook", "email", "slack", "telegram"},
+		Channels:       []string{"webhook", "syslog", "email", "slack", "telegram"},
 		CustomInterval: true,
 		ScanNow:        true,
 	},
 	TierTeam: {
 		MaxTargets:     0, // unlimited
 		RetentionDays:  0, // unlimited
-		Channels:       []string{"webhook", "email", "slack", "telegram", "pagerduty", "teams"},
+		Channels:       []string{"webhook", "syslog", "email", "slack", "telegram", "pagerduty", "teams"},
 		MultiUser:      true,
 		CustomInterval: true,
 		ScanNow:        true,
