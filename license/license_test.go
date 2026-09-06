@@ -137,25 +137,31 @@ func TestEnforcement_TargetsChannelsRetention(t *testing.T) {
 	free := Activation{Tier: TierFree, Limits: TierLimits[TierFree]}
 	team := Activation{Tier: TierTeam, Limits: TierLimits[TierTeam]}
 
-	// Targets: free caps at 10; team unlimited.
-	if !free.CanAddTarget(9) || free.CanAddTarget(10) {
-		t.Fatal("free tier must cap at exactly 10 targets")
+	// Targets: free caps at whatever the table says, so the test moves with
+	// the product instead of pinning a number nobody remembers to change.
+	capFree := TierLimits[TierFree].MaxTargets
+	if capFree == 0 {
+		t.Fatal("free tier must have a finite target cap")
+	}
+	if !free.CanAddTarget(capFree-1) || free.CanAddTarget(capFree) {
+		t.Fatalf("free tier must cap at exactly %d targets", capFree)
 	}
 	if !team.CanAddTarget(1_000_000) {
 		t.Fatal("team tier targets must be unlimited")
 	}
 
-	// Channels: free gets webhook only.
-	if !free.AllowsChannel("webhook") || free.AllowsChannel("slack") {
+	// Channels: free gets webhook and syslog — syslog is what lets a free
+	// install feed Loglight, and it is deliberately not a paid feature.
+	if !free.AllowsChannel("webhook") || !free.AllowsChannel("syslog") || free.AllowsChannel("slack") {
 		t.Fatal("free tier channels wrong")
 	}
 	if !team.AllowsChannel("pagerduty") {
 		t.Fatal("team should allow pagerduty")
 	}
 
-	// Retention: free = 7 days; team unlimited (zero cutoff).
+	// Retention: free = the table's day count; team unlimited (zero cutoff).
 	cut := free.RetentionCutoff(now)
-	if want := now.AddDate(0, 0, -7); !cut.Equal(want) {
+	if want := now.AddDate(0, 0, -TierLimits[TierFree].RetentionDays); !cut.Equal(want) {
 		t.Fatalf("free retention cutoff wrong: %v", cut)
 	}
 	if !team.RetentionCutoff(now).IsZero() {
