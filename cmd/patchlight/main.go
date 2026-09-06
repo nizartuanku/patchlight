@@ -40,9 +40,11 @@ import (
 // Empty → every key invalid → permanent free edition (this open-source build).
 var issuerPublicKeyB64 = ""
 
-// patchlightTierLimits: free = 25 inventory items, Pro = 500, Team = unlimited.
+// patchlightTierLimits: free = 150 inventory items, Pro = 500, Team = unlimited.
+// 150 is the size of a small estate's real inventory — enough that the free
+// edition answers the question it was built for, rather than sampling it.
 var patchlightTierLimits = map[license.Tier]license.Limits{
-	license.TierFree: {MaxTargets: 25, RetentionDays: 30, Channels: []string{"webhook", "syslog"}},
+	license.TierFree: {MaxTargets: 150, RetentionDays: 30, Channels: []string{"webhook", "syslog"}},
 	license.TierPro: {MaxTargets: 500, RetentionDays: 365,
 		Channels: []string{"webhook", "syslog", "email", "slack", "telegram"}, CustomInterval: true, ScanNow: true},
 	license.TierTeam: {MaxTargets: 0, RetentionDays: 0,
