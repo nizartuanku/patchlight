@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -134,15 +135,16 @@ func TestAPI_AddTargetScanAndFindings(t *testing.T) {
 
 func TestAPI_FreeTierTargetLimitEnforced(t *testing.T) {
 	e := newEnv(t)
-	for i := 0; i < 10; i++ {
-		resp := e.post(t, "/api/targets", map[string]string{"target": "host-" + string(rune('a'+i))})
+	capFree := license.TierLimits[license.TierFree].MaxTargets
+	for i := 0; i < capFree; i++ {
+		resp := e.post(t, "/api/targets", map[string]string{"target": fmt.Sprintf("host-%d", i)})
 		if resp.StatusCode != 200 {
 			t.Fatalf("target %d rejected too early: %d", i, resp.StatusCode)
 		}
 	}
 	resp := e.post(t, "/api/targets", map[string]string{"target": "one-too-many"})
 	if resp.StatusCode != http.StatusPaymentRequired {
-		t.Fatalf("11th target on free tier must be 402, got %d", resp.StatusCode)
+		t.Fatalf("target %d on free tier must be 402, got %d", capFree+1, resp.StatusCode)
 	}
 }
 
