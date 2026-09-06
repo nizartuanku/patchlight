@@ -53,13 +53,13 @@ it (or a local mirror):
 
 | | Free (this repo) | Pro | Team |
 |---|---|---|---|
-| Inventory items | 25 | 500 | Unlimited |
+| Inventory items | 150 | 500 | Unlimited |
 | Manual + CPE input | ✅ | ✅ | ✅ |
 | SBOM import (CycloneDX/SPDX) | ✅ (to the item cap) | ✅ | ✅ |
 | KEV + EPSS + CVSS ranking | ✅ | ✅ | ✅ |
-| Scan interval | Daily fixed | Custom + scan-now | Custom + scan-now |
-| Alert channels | Webhook | + Email, Slack, Telegram | + PagerDuty, MS Teams |
-| Offline / air-gapped mirror | — | ✅ | ✅ |
+| Scan interval | Every 12 hours (fixed) | Custom + scan-now | Custom + scan-now |
+| Alert channels | Webhook, syslog | + Email, Slack, Telegram | + PagerDuty, MS Teams |
+| Offline / air-gapped mirror | ✅ | ✅ | ✅ |
 | History | 30 days | 1 year | Unlimited |
 | Support | Community | Email | Priority |
 
