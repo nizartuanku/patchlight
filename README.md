@@ -97,6 +97,21 @@ Available on every tier, free included.
   SBOM). Pair it with an SBOM generator for automatic inventory.
 - Accuracy depends on NVD's CPE data and your inventory's precision — every
   finding shows the matched CPE and version range so you can sanity-check.
+- **A name Patchlight has never seen may still resolve to the wrong CPE.**
+  Product names are resolved to the token NVD indexes (which is not always the
+  name on the box: "Apache HTTP Server" is `http_server`, an operating system is
+  part `o`, not `a`). Known-awkward names are handled from a built-in table so
+  this works with no network; anything else falls back to a normalised token,
+  and a token NVD does not use finds nothing. The same is true of the version
+  string: NVD indexes distribution releases with an explicit minor, so `Debian
+  12` is stored as `debian_linux 12.0` (Patchlight adds the `.0` for operating
+  systems, but no rule covers every product). **A target with zero findings is
+  the case to check first** — open it and confirm the CPE is the one NVD uses.
+- The vendor field is left wildcarded on purpose. Measured against NVD, a
+  wildcard vendor matched the vendor-specific CVE count everywhere it was tried
+  and found more in two cases; a guessed vendor can only narrow the search, and
+  narrowing on a guess is how a scanner reports "nothing found" for a product
+  that has thousands of CVEs.
 - KEV is curated (not exhaustive); EPSS is a probability. Both are shown as
   numbers, not black-box verdicts.
 - Not a patch-deployment tool, and not a replacement for a host vuln scanner — a
