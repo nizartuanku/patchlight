@@ -27,7 +27,8 @@ telemetry. License validation is offline cryptography — no phone-home, ever.
 ## Quick start
 
 ```bash
-# Docker
+# Docker — build the image from this repo first; there is no published patchlight image
+docker build -t patchlight .
 docker run -d -p 127.0.0.1:8425:8425 -v patchlight-data:/data patchlight
 
 # Or the bare binary
@@ -61,6 +62,8 @@ it (or a local mirror):
 | Offline / air-gapped mirror | — | ✅ | ✅ |
 | History | 30 days | 1 year | Unlimited |
 | Support | Community | Email | Priority |
+
+**Whop sells paid licences only.** Free: github.com/nizartuanku/patchlight — this repository is the free edition, Apache-2.0, no time limit; nothing on Whop is free, so try it here first.
 
 Pro ($29/mo) and Team ($99/mo) licenses, each with a 14-day free trial:
 **https://whop.com/nizar-tuanku/patchlight-cve-prioritizer?utm_source=github**
