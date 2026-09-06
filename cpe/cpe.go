@@ -97,20 +97,18 @@ func (c CPE) Label() string {
 	return strings.Join(parts, " ")
 }
 
-// FromProductVersion builds a best-effort application CPE from a free-text
-// product and version (vendor left as a wildcard so NVD's match logic can pair
-// it). It is the fallback when no NVD dictionary resolution is available; the
-// resolver in the nvd package produces a precise cpeName when it can.
+// FromProductVersion builds a best-effort CPE from a free-text product and
+// version. The part and the product token come from Normalize, which is what
+// makes an operating system findable at all; the vendor is left wildcarded on
+// purpose (see normalize.go for the measurements). It works with no network,
+// which matters for an air-gapped install where the NVD dictionary resolver in
+// the nvd package is not reachable.
 func FromProductVersion(product, version string) (CPE, error) {
-	product = normalizeToken(product)
-	if product == "" {
+	part, prod := Normalize(product)
+	if prod == "" {
 		return CPE{}, fmt.Errorf("empty product")
 	}
-	v := normalizeToken(version)
-	if v == "" {
-		v = "*"
-	}
-	return CPE{Part: "a", Vendor: "*", Product: product, Version: v}, nil
+	return CPE{Part: part, Vendor: "*", Product: prod, Version: NormalizeVersion(part, version)}, nil
 }
 
 func normalizeToken(s string) string {
