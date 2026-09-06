@@ -87,7 +87,7 @@ func (c *Client) CVEsFor(ctx context.Context, target cpe.CPE) ([]CVE, error) {
 	if err != nil {
 		return nil, err
 	}
-	cves, err := parseCVEs(body)
+	cves, err := parseCVEs(body, target)
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +111,8 @@ func (c *Client) Resolve(ctx context.Context, product, version string) (cpe.CPE,
 	if err != nil {
 		return cpe.FromProductVersion(product, version)
 	}
-	name, ok := parseTopCPE(body)
+	_, want := cpe.Normalize(product)
+	name, ok := parseTopCPE(body, want)
 	if !ok {
 		return cpe.FromProductVersion(product, version)
 	}
@@ -174,7 +175,7 @@ type metric struct {
 	} `json:"cvssData"`
 }
 
-func parseCVEs(body []byte) ([]CVE, error) {
+func parseCVEs(body []byte, target cpe.CPE) ([]CVE, error) {
 	var f cveFeed
 	if err := json.Unmarshal(body, &f); err != nil {
 		return nil, err
@@ -190,7 +191,7 @@ func parseCVEs(body []byte) ([]CVE, error) {
 			}
 		}
 		c.CVSS, c.CVSSVector = bestCVSS(v.Metrics.V31, v.Metrics.V30, v.Metrics.V2)
-		c.FixedVersion, c.VersionRange, c.MatchedCPE = versionInfo(v.Configurations)
+		c.FixedVersion, c.VersionRange, c.MatchedCPE = versionInfo(v.Configurations, target)
 		out = append(out, c)
 	}
 	return out, nil
@@ -215,11 +216,22 @@ func versionInfo(configs []struct {
 			VersionEndIncluding   string `json:"versionEndIncluding"`
 		} `json:"cpeMatch"`
 	} `json:"nodes"`
-}) (fixed, rng, matched string) {
+}, target cpe.CPE) (fixed, rng, matched string) {
+	// The first vulnerable cpeMatch in a configuration is not necessarily the
+	// one this target is. A CVE that needs two products present at once — the
+	// classic case is CVE-2019-0190, an AND of Apache httpd and OpenSSL — lists
+	// both, and taking the first one told an OpenSSL owner their fix version
+	// was an httpd release number. The finding was not wrong about the CVE; it
+	// was wrong about the evidence, which is worse, because the evidence is
+	// what someone acts on.
+	//
+	// So: only a cpeMatch naming this target's product counts. If the
+	// configuration never names it, no version evidence is reported at all —
+	// an empty field is honest, a borrowed one is not.
 	for _, cfg := range configs {
 		for _, node := range cfg.Nodes {
 			for _, m := range node.CpeMatch {
-				if !m.Vulnerable {
+				if !m.Vulnerable || !criteriaIsTarget(m.Criteria, target) {
 					continue
 				}
 				matched = m.Criteria
@@ -243,7 +255,42 @@ func versionInfo(configs []struct {
 	return "", "", ""
 }
 
-func parseTopCPE(body []byte) (string, bool) {
+// criteriaIsTarget reports whether an NVD cpeMatch criteria string describes
+// the product being scanned. Product must agree; part and vendor must agree
+// unless the target left them wildcarded, which is the normal case for a
+// target derived from a package name.
+func criteriaIsTarget(criteria string, target cpe.CPE) bool {
+	c, err := cpe.Parse(criteria)
+	if err != nil {
+		return false
+	}
+	if !eqField(c.Product, target.Product) {
+		return false
+	}
+	if !eqField(c.Part, target.Part) {
+		return false
+	}
+	return eqField(c.Vendor, target.Vendor)
+}
+
+// eqField compares one CPE field, treating "*" and "-" on either side as
+// "unspecified, so it cannot disagree".
+func eqField(a, b string) bool {
+	if a == "" || a == "*" || a == "-" || b == "" || b == "*" || b == "-" {
+		return true
+	}
+	return strings.EqualFold(a, b)
+}
+
+// parseTopCPE picks the dictionary entry that best answers a keyword search.
+//
+// It used to take the first non-deprecated name starting with "cpe:2.3:a:",
+// which is wrong twice over: it silently refuses every operating system, and
+// among applications it takes whatever the search happened to return first
+// rather than the one whose product is actually the thing being asked about.
+// want is the normalised product token; an entry whose product equals it wins,
+// then one that contains it, and only then the first non-deprecated entry.
+func parseTopCPE(body []byte, want string) (string, bool) {
 	var r struct {
 		Products []struct {
 			CPE struct {
@@ -255,15 +302,51 @@ func parseTopCPE(body []byte) (string, bool) {
 	if err := json.Unmarshal(body, &r); err != nil {
 		return "", false
 	}
+	var exact, contains, any string
 	for _, p := range r.Products {
-		if !p.CPE.Deprecated && strings.HasPrefix(p.CPE.CpeName, "cpe:2.3:a:") {
+		name := p.CPE.CpeName
+		if name == "" {
+			continue
+		}
+		if any == "" {
+			any = name
+		}
+		if p.CPE.Deprecated {
+			continue
+		}
+		parsed, err := cpe.Parse(name)
+		if err != nil {
+			continue
+		}
+		switch {
+		case want != "" && strings.EqualFold(parsed.Product, want):
+			if exact == "" {
+				exact = name
+			}
+		case want != "" && strings.Contains(strings.ToLower(parsed.Product), strings.ToLower(want)):
+			if contains == "" {
+				contains = name
+			}
+		default:
+			if contains == "" && exact == "" && any == "" {
+				any = name
+			}
+		}
+	}
+	for _, cand := range []string{exact, contains} {
+		if cand != "" {
+			return cand, true
+		}
+	}
+	// Nothing named the product. Prefer a non-deprecated entry over the first
+	// one in the response.
+	for _, p := range r.Products {
+		if !p.CPE.Deprecated && p.CPE.CpeName != "" {
 			return p.CPE.CpeName, true
 		}
 	}
-	for _, p := range r.Products {
-		if p.CPE.CpeName != "" {
-			return p.CPE.CpeName, true
-		}
+	if any != "" {
+		return any, true
 	}
 	return "", false
 }
