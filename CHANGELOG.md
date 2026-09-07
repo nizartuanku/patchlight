@@ -1,6 +1,44 @@
 # Changelog
 
-## Unreleased
+## 0.1.2 — 2026-09-07
+
+### The free edition now holds 150 inventory items
+
+The free tier carried a 25-item cap inherited from an earlier product, well
+below the size of the estate most people want to point it at first. Free now
+holds **150 items**. Pro stays at 500, Team stays unlimited.
+
+The edition table in the README had drifted from the code in three other rows,
+and the code was right every time: the free scan interval is every 12 hours and
+fixed, free alert channels are webhook **and** syslog, and the offline /
+air-gapped mirror flags were never gated by tier at all. The table now says what
+the binary does. The tests that pinned the free limit read the tier table instead
+of a hardcoded number, so the next change to a cap cannot quietly break them.
+
+### Verification identifiers renamed to Hexward
+
+The HTTP header, DNS TXT label and well-known file used to prove domain
+ownership still carried the pre-rename brand. They are now `X-Hexward-Token`,
+`_hexward-verify.<domain>` and `/.well-known/hexward-verify.txt`.
+
+Nothing already installed breaks. Verification accepts either the old or the new
+name, and the webhook sends both headers, so a receiver written against the old
+one keeps working with no change at either end. The old names are removed on
+**1 March 2027**. New installations, the wizard and the documentation show only
+the new names.
+
+### Where the paid editions are, from inside the product
+
+The licence panel, the footer, and the message you get when a free-edition limit
+is reached now all point at the product page. No banner, no modal, no countdown —
+the free edition is meant to be useful on its own.
+
+### docs/CONCEPTS.md
+
+A new document on what Patchlight is reasoning about: CPE, KEV, EPSS, and why a
+target that returns no findings is the first thing to check rather than the last.
+
+## 0.1.1 — 2026-09-06
 
 ### Targets that returned no findings at all
 
