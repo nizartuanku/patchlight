@@ -39,12 +39,12 @@ Patchlight runs on your own host as a single binary. The only outbound traffic i
 - It does not know about back-ported fixes. If your distribution patched a package but kept the upstream version number, Patchlight will still match it. Every finding shows the version range so you can check.
 - It is not a replacement for a host scanner. It is the layer that decides, out of everything a scanner might find, which five to do first.
 ## Try it
-The free Apache-2.0 edition on GitHub carries the full ranking, the diff, and webhook and syslog alerts. Release 0.1.1 caps the inventory at 25 items; the next release raises that cap to 150. Make sure you are on 0.1.1 or later — the earlier build is the one with the resolver defect described above, and it is marked superseded.
+The free Apache-2.0 edition on GitHub carries the full ranking, the diff, and webhook and syslog alerts. Release 0.1.2 caps the inventory at 150 items. Make sure you are on 0.1.2 or later — earlier builds carry the resolver defect described above, and they are marked superseded.
 ```
-curl -LO https://github.com/nizartuanku/patchlight/releases/latest/download/patchlight-free-0.1.1-linux-amd64.tar.gz
+curl -LO https://github.com/nizartuanku/patchlight/releases/latest/download/patchlight-free-0.1.2-linux-amd64.tar.gz
 curl -LO https://github.com/nizartuanku/patchlight/releases/latest/download/SHA256SUMS
 sha256sum -c SHA256SUMS
-tar xzf patchlight-free-0.1.1-linux-amd64.tar.gz && ./patchlight
+tar xzf patchlight-free-0.1.2-linux-amd64.tar.gz && ./patchlight
 ```
 Pro (500 items, custom schedule, Slack/Telegram/email) and Team (unlimited, PagerDuty/Teams) are on Whop; Whop sells paid licences only.
 Nizar Tuanku — Cybersecurity. · github.com/nizartuanku/patchlight
