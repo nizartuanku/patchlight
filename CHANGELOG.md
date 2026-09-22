@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- **The CONCEPTS install block and the free-edition cap now say what the binary does.** `docs/CONCEPTS.md` carried an install block that had never been run and a free-edition figure that predated the change to 150 items. Both are corrected against the released archive and the tier table in the code.
+- **`scripts/first-run.sh` — one command from a clean machine to a working dashboard.** It resolves the latest release at run time rather than pinning a tag, verifies the download against `SHA256SUMS` with no `--ignore-missing`, extracts, starts the binary and polls the dashboard until it answers. If the port is already taken it says so instead of letting the binary exit a second later and read like a broken product (`FIRST_RUN_PORT` overrides).
+- **The first-run script names the GitHub API rate limit.** Step 1 resolves the latest release through the unauthenticated GitHub API, capped at 60 calls per hour per address. When that budget is gone the script used to report "cannot reach api.github.com", which reads like a network fault or a dead product; it now reports the rate limit and when it resets.
+
 ## 0.1.2 — 2026-09-07
 
 ### The free edition now holds 150 inventory items
