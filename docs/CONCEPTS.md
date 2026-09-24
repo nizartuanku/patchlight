@@ -41,10 +41,10 @@ Patchlight runs on your own host as a single binary. The only outbound traffic i
 ## Try it
 The free Apache-2.0 edition on GitHub carries the full ranking, the diff, and webhook and syslog alerts. Release 0.1.2 caps the inventory at 150 items. Make sure you are on 0.1.2 or later — earlier builds carry the resolver defect described above, and they are marked superseded.
 ```
-curl -LO https://github.com/nizartuanku/patchlight/releases/latest/download/patchlight-free-0.1.2-linux-amd64.tar.gz
+curl -LO https://github.com/nizartuanku/patchlight/releases/latest/download/patchlight-free-0.1.3-linux-amd64.tar.gz
 curl -LO https://github.com/nizartuanku/patchlight/releases/latest/download/SHA256SUMS
 sha256sum -c SHA256SUMS
-tar xzf patchlight-free-0.1.2-linux-amd64.tar.gz && ./patchlight
+tar xzf patchlight-free-0.1.3-linux-amd64.tar.gz && ./patchlight
 ```
 Pro (500 items, custom schedule, Slack/Telegram/email) and Team (unlimited, PagerDuty/Teams) are on Whop; Whop sells paid licences only.
 Nizar Tuanku — Cybersecurity. · github.com/nizartuanku/patchlight

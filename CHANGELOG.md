@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.3 — 2026-09-24
 
 - **AI Assist (optional): an ✨ Explain button on every finding.** When Patchlight is started
   with `-ai-assist-url`, a local [hexward-ai](https://github.com/nizartuanku/hexward-ai) sidecar
