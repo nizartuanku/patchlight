@@ -64,6 +64,10 @@ func main() {
 	nvdCPEURL := flag.String("nvd-cpe-url", "", "override NVD CPE dictionary base (air-gapped mirror)")
 	kevURL := flag.String("kev-url", "", "override CISA KEV feed URL (air-gapped mirror)")
 	epssURL := flag.String("epss-url", "", "override FIRST EPSS API base (air-gapped mirror)")
+	aiURL := flag.String("ai-assist-url", os.Getenv("PATCHLIGHT_AI_ASSIST_URL"), "optional hexward-ai sidecar URL for AI-narrated explanations, e.g. http://127.0.0.1:8435 (off when empty)")
+	aiKeyFile := flag.String("ai-assist-key-file", os.Getenv("PATCHLIGHT_AI_ASSIST_KEY_FILE"), "API key file for a dedicated AI host or your own OpenAI-compatible endpoint (Pro/Team)")
+	aiLang := flag.String("ai-assist-lang", os.Getenv("PATCHLIGHT_AI_ASSIST_LANG"), "language of AI explanations: en (default) or id")
+	aiNoThinking := flag.Bool("ai-assist-no-thinking", os.Getenv("PATCHLIGHT_AI_ASSIST_NO_THINKING") == "1", "disable reasoning mode (Qwen3 enterprise profiles)")
 	flag.Parse()
 
 	db, err := sql.Open("sqlite3", *dbPath)
@@ -105,6 +109,16 @@ func main() {
 		}
 	}
 	server := web.NewServer(module.Describe(), st, scheduler, pub, *licFile)
+
+	aiAssist, aiErr := web.NewAIAssist(web.AIConfig{URL: *aiURL, KeyFile: *aiKeyFile, Language: *aiLang, NoThinking: *aiNoThinking})
+	if aiErr != nil {
+		fmt.Fprintln(os.Stderr, "patchlight: "+aiErr.Error())
+		os.Exit(2)
+	}
+	server.AI = aiAssist
+	if aiAssist != nil {
+		fmt.Fprintf(os.Stderr, "patchlight: AI Assist on — explanations from %s (language %s)\n", aiAssist.Endpoint, aiAssist.Language)
+	}
 	server.Targets = st
 	server.TierLimits = patchlightTierLimits
 
