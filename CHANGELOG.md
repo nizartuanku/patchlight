@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Docs: `docs/samples/` added — a real match against two named CVEs (Apache httpd 2.4.49, Apache Log4j 2.14.1) run on the free edition against live NVD/CISA KEV/FIRST EPSS feeds, findings exported as the API returned them.
 - Docs: English is the supported AI Assist language in this release. Bahasa Indonesia
   (`-ai-assist-lang id`) is an unsupported preview; more languages will be added based on demand.
 

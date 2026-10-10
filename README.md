@@ -24,6 +24,8 @@ never leaves your network** — only CPE queries go to the public feeds (NVD, CI
 KEV, FIRST EPSS), never to us, and you can point them at a local mirror. No
 telemetry. License validation is offline cryptography — no phone-home, ever.
 
+**See the actual output** — [a real match against two named CVEs](docs/samples/): Apache httpd 2.4.49 and Log4j 2.14.1, checked for real against live NVD/CISA KEV/FIRST EPSS feeds, findings reported exactly as the API returned them.
+
 ## Quick start
 
 ```bash
