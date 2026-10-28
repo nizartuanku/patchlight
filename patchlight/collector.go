@@ -28,7 +28,7 @@ func (c *Collector) Describe() core.ModuleInfo {
 	return core.ModuleInfo{
 		ID:              ModuleID,
 		Name:            "Patchlight",
-		Version:         "0.1.3",
+		Version:         "0.1.4",
 		TargetKind:      "cpe",
 		DefaultInterval: 12 * time.Hour,
 		ResolveAfter:    1,

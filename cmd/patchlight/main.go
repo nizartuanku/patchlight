@@ -25,6 +25,7 @@ import (
 
 	_ "github.com/mattn/go-sqlite3" // dev driver; release swaps to modernc.org/sqlite
 
+	"github.com/nizartuanku/hexward-core/hfs"
 	"github.com/nizartuanku/patchlight/epss"
 	"github.com/nizartuanku/patchlight/kev"
 	"github.com/nizartuanku/patchlight/license"
@@ -44,11 +45,11 @@ var issuerPublicKeyB64 = ""
 // 150 is the size of a small estate's real inventory — enough that the free
 // edition answers the question it was built for, rather than sampling it.
 var patchlightTierLimits = map[license.Tier]license.Limits{
-	license.TierFree: {MaxTargets: 150, RetentionDays: 30, Channels: []string{"webhook", "syslog"}},
+	license.TierFree: {MaxTargets: 150, RetentionDays: 30, Channels: []string{"webhook", "syslog", "file", "splunk-hec"}},
 	license.TierPro: {MaxTargets: 500, RetentionDays: 365,
-		Channels: []string{"webhook", "syslog", "email", "slack", "telegram"}, CustomInterval: true, ScanNow: true},
+		Channels: []string{"webhook", "syslog", "file", "splunk-hec", "email", "slack", "telegram"}, CustomInterval: true, ScanNow: true},
 	license.TierTeam: {MaxTargets: 0, RetentionDays: 0,
-		Channels:  []string{"webhook", "syslog", "email", "slack", "telegram", "pagerduty", "teams"},
+		Channels:  []string{"webhook", "syslog", "file", "splunk-hec", "email", "slack", "telegram", "pagerduty", "teams"},
 		MultiUser: true, CustomInterval: true, ScanNow: true},
 }
 
@@ -56,9 +57,7 @@ func main() {
 	listen := flag.String("listen", "127.0.0.1:8425", "dashboard listen address")
 	dbPath := flag.String("db", "patchlight.db", "SQLite database path")
 	licFile := flag.String("license", "patchlight-license.key", "license key file")
-	webhook := flag.String("webhook", "", "webhook URL for alerts")
-	syslogAddr := flag.String("syslog", "", "syslog collector host:port for findings, e.g. 127.0.0.1:5514 (point this at Loglight to correlate across products)")
-	syslogNet := flag.String("syslog-network", "udp", "syslog transport: udp or tcp")
+	chf := registerChannelFlags(flag.CommandLine)
 	nvdKey := flag.String("nvd-api-key", "", "NVD API key (raises the rate limit)")
 	nvdCVEURL := flag.String("nvd-cve-url", "", "override NVD CVE API base (air-gapped mirror)")
 	nvdCPEURL := flag.String("nvd-cpe-url", "", "override NVD CPE dictionary base (air-gapped mirror)")
@@ -109,6 +108,8 @@ func main() {
 		}
 	}
 	server := web.NewServer(module.Describe(), st, scheduler, pub, *licFile)
+	server.ExportMeta = hfs.Meta{Product: module.Describe().ID, Version: module.Describe().Version, Host: hostname()}
+	server.ExportEvidence = chf.evidenceMode()
 
 	aiAssist, aiErr := web.NewAIAssist(web.AIConfig{URL: *aiURL, KeyFile: *aiKeyFile, Language: *aiLang, NoThinking: *aiNoThinking})
 	if aiErr != nil {
@@ -138,12 +139,10 @@ func main() {
 	}
 	server.ExtraRoutes = console.Register
 
-	var channels []notify.Channel
-	if *webhook != "" {
-		channels = append(channels, &notify.WebhookChannel{URL: *webhook})
-	}
-	if *syslogAddr != "" {
-		channels = append(channels, &notify.SyslogChannel{Addr: *syslogAddr, Network: *syslogNet})
+	channels, chErr := chf.build(hfs.Meta{Product: module.Describe().ID, Version: module.Describe().Version, Host: hostname()})
+	if chErr != nil {
+		fmt.Fprintln(os.Stderr, "patchlight: "+chErr.Error())
+		os.Exit(2)
 	}
 	if len(channels) > 0 {
 		disp := notify.NewDispatcher(notify.Config{}, channels...)
