@@ -203,7 +203,7 @@ Environment equivalents: `PATCHLIGHT_AI_ASSIST_URL`, `PATCHLIGHT_AI_ASSIST_KEY_F
 
 ## Built by
 
-Nizar Tuanku — Cybersecurity. Part of the Hexward line of
+Nizar Tuanku — Cybersecurity Tools + AI. Part of the Hexward line of
 self-hosted security tools:
 [CertLight](https://whop.com/nizar-tuanku/certlight-tls-monitor?utm_source=github) (certs),
 [Attack Surface Monitor](https://whop.com/nizar-tuanku/attack-surface-monitor?utm_source=github) (exposure),
